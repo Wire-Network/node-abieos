@@ -1,4 +1,0 @@
-[submodule "abieos"]
-	path = abieos
-	url = ../abieos
-    # https://github.com/AntelopeIO/abieos.git

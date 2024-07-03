@@ -21,18 +21,10 @@
     "build:linux:ci": "cmake-js compile && cp build/Release/node_abieos.node lib/abieos.node",
     "build:win": "cmake-js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eosrio/node-abieos.git"
-  },
-  "author": "EOS Rio",
+  "author": "Wire Network",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eosrio/node-abieos/issues"
-  },
-  "homepage": "https://github.com/eosrio/node-abieos#readme",
   "devDependencies": {
-    "@types/node": "20.12.7",
+    "@types/node": "^20.12.7",
     "cmake-js": "7.3.0",
     "node-addon-api": "8.0.0",
     "tsup": "^8.0.2",
