@@ -5,7 +5,7 @@
 #include "operators.hpp"
 #include <vector>
 
-namespace eosio {
+namespace sysio {
 
 struct bytes {
    std::vector<char> data;
@@ -16,12 +16,12 @@ EOSIO_COMPARE(bytes);
 
 template <typename S>
 void from_json(bytes& obj, S& stream) {
-   return eosio::from_json_hex(obj.data, stream);
+   return sysio::from_json_hex(obj.data, stream);
 }
 
 template <typename S>
 void to_json(const bytes& obj, S& stream) {
-   return eosio::to_json_hex(obj.data.data(), obj.data.size(), stream);
+   return sysio::to_json_hex(obj.data.data(), obj.data.size(), stream);
 }
 
-} // namespace eosio
+} // namespace sysio

@@ -15,7 +15,7 @@
 #include <string_view>
 #include <tuple>
 
-namespace eosio {
+namespace sysio {
 /**
  *  @defgroup symbol Symbol
  *  @ingroup core
@@ -55,11 +55,11 @@ class symbol_code {
     */
    constexpr explicit symbol_code(std::string_view str) : value(0) {
       if (str.size() > 7) {
-         eosio::check(false, "string is too long to be a valid symbol_code");
+         sysio::check(false, "string is too long to be a valid symbol_code");
       }
       for (auto itr = str.rbegin(); itr != str.rend(); ++itr) {
          if (*itr < 'A' || *itr > 'Z') {
-            eosio::check(false, "only uppercase letters allowed in symbol_code string");
+            sysio::check(false, "only uppercase letters allowed in symbol_code string");
          }
          value <<= 8;
          value |= *itr;
@@ -176,7 +176,7 @@ template <typename S>
 void from_json(symbol_code& obj, S& stream) {
    auto s = stream.get_string();
    check(string_to_symbol_code(obj.value, s.data(), s.data() + s.size()),
-      convert_json_error(eosio::from_json_error::expected_symbol_code));
+      convert_json_error(sysio::from_json_error::expected_symbol_code));
 }
 
 /**
@@ -254,7 +254,7 @@ template <typename S>
 void from_json(symbol& obj, S& stream) {
    auto s = stream.get_string();
    check(string_to_symbol(obj.value, s.data(), s.data() + s.size()),
-      convert_json_error(eosio::from_json_error::expected_symbol));
+      convert_json_error(sysio::from_json_error::expected_symbol));
 }
 
 /**
@@ -297,4 +297,4 @@ class extended_symbol {
 
 EOSIO_REFLECT(extended_symbol, sym, contract);
 EOSIO_COMPARE(extended_symbol);
-} // namespace eosio
+} // namespace sysio

@@ -7,7 +7,7 @@
 #include "murmur.hpp"
 #include <string>
 
-namespace eosio {
+namespace sysio {
 
 struct name {
    enum class raw : uint64_t {};
@@ -21,7 +21,7 @@ struct name {
    constexpr name(const name&) = default;
 
    constexpr   operator raw() const { return static_cast<raw>(value); }
-   explicit    operator std::string() const { return eosio::name_to_string(value); }
+   explicit    operator std::string() const { return sysio::name_to_string(value); }
    std::string to_string() const { return std::string(*this); }
    /**
     * Explicit cast to bool of the uint64_t value of the name
@@ -44,7 +44,7 @@ struct name {
       else if (c >= 'a' && c <= 'z')
          return (c - 'a') + 6;
       else
-         eosio::check(false, "character is not in allowed character set for names");
+         sysio::check(false, "character is not in allowed character set for names");
 
       return 0; // control flow will never reach here; just added to suppress warning
    }
@@ -158,7 +158,7 @@ void from_json(name& obj, S& stream) {
 
 template <typename S>
 void to_json(const name& obj, S& stream) {
-   to_json(eosio::name_to_string(obj.value), stream);
+   to_json(sysio::name_to_string(obj.value), stream);
 }
 
 inline namespace literals {
@@ -175,4 +175,4 @@ inline namespace literals {
 #endif
 } // namespace literals
 
-} // namespace eosio
+} // namespace sysio
