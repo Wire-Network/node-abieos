@@ -3,7 +3,7 @@
 #include "map_macro.h"
 #include <type_traits>
 
-namespace eosio { namespace reflection {
+namespace sysio { namespace reflection {
 
    template <typename T>
    struct has_for_each_field {
@@ -14,7 +14,7 @@ namespace eosio { namespace reflection {
       };
 
       template <typename C>
-      static char test(decltype(eosio_for_each_field((C*)nullptr, std::declval<F>()))*);
+      static char test(decltype(sysio_for_each_field((C*)nullptr, std::declval<F>()))*);
 
       template <typename C>
       static long test(...);
@@ -32,12 +32,12 @@ namespace eosio { namespace reflection {
 #define EOSIO_REFLECT_STRIP_BASEbase
 #define EOSIO_REFLECT_BASE(STRUCT, BASE)                                                                               \
    static_assert(std::is_base_of_v<EOSIO_REFLECT_STRIP_BASE##BASE, STRUCT>, #BASE " is not a base class of " #STRUCT); \
-   eosio_for_each_field((EOSIO_REFLECT_STRIP_BASE##BASE*)nullptr, f);
+   sysio_for_each_field((EOSIO_REFLECT_STRIP_BASE##BASE*)nullptr, f);
 
 #define EOSIO_REFLECT_SIGNATURE(STRUCT, ...)                                                                           \
    [[maybe_unused]] inline constexpr const char* get_type_name(STRUCT*) { return #STRUCT; }                                      \
    template <typename F>                                                                                               \
-   constexpr void eosio_for_each_field(STRUCT*, F f)
+   constexpr void sysio_for_each_field(STRUCT*, F f)
 
 /**
  * EOSIO_REFLECT(<struct>, <member or base spec>...)
@@ -58,4 +58,4 @@ namespace eosio { namespace reflection {
    EOSIO_APPLY(EOSIO_REFLECT_SELECT_I, (EOSIO_CAT(EOSIO_REFLECT_IS_BASE_TEST, FIELD()), MEMBER, BASE, MEMBER))         \
    (STRUCT, FIELD)
 
-}} // namespace eosio::reflection
+}} // namespace sysio::reflection

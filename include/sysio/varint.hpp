@@ -9,7 +9,7 @@
 #include "to_bin.hpp"
 #include "to_json.hpp"
 
-namespace eosio {
+namespace sysio {
 /**
  * @defgroup varint Variable Length Integer Type
  * @ingroup core
@@ -449,4 +449,4 @@ void to_key(const varint32& obj, S& stream) {
    return to_key_varint32(obj.value, stream);
 }
 
-} // namespace eosio
+} // namespace sysio

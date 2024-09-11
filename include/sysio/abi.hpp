@@ -15,7 +15,7 @@
 #include "bytes.hpp"
 #include "asset.hpp"
 
-namespace eosio {
+namespace sysio {
 
 enum class abi_error {
    no_error,
@@ -30,7 +30,7 @@ enum class abi_error {
    bad_abi
 };
 
-constexpr inline std::string_view convert_abi_error(eosio::abi_error e) {
+constexpr inline std::string_view convert_abi_error(sysio::abi_error e) {
    switch (e) {
       case abi_error::no_error: return "No error";
       case abi_error::recursion_limit_reached: return "Recursion limit reached";
@@ -98,7 +98,7 @@ struct struct_def {
 EOSIO_REFLECT(struct_def, name, base, fields);
 
 struct action_def {
-   eosio::name name{};
+   sysio::name name{};
    std::string type{};
    std::string ricardian_contract{};
 };
@@ -106,7 +106,7 @@ struct action_def {
 EOSIO_REFLECT(action_def, name, type, ricardian_contract);
 
 struct table_def {
-   eosio::name              name{};
+   sysio::name              name{};
    std::string              index_type{};
    std::vector<std::string> key_names{};
    std::vector<std::string> key_types{};
@@ -137,14 +137,14 @@ struct variant_def {
 EOSIO_REFLECT(variant_def, name, types);
 
 struct action_result_def {
-   eosio::name name{};
+   sysio::name name{};
    std::string result_type{};
 };
 
 EOSIO_REFLECT(action_result_def, name, result_type);
 
 struct primary_key_index_def {
-   eosio::name name{};
+   sysio::name name{};
    std::string type;
 };
 
@@ -159,7 +159,7 @@ EOSIO_REFLECT(secondary_index_def, type);
 struct kv_table_entry_def {
    std::string                                type;
    primary_key_index_def                      primary_index;
-   std::map<eosio::name, secondary_index_def> secondary_indices;
+   std::map<sysio::name, secondary_index_def> secondary_indices;
 };
 
 EOSIO_REFLECT(kv_table_entry_def, type, primary_index, secondary_indices);
@@ -175,7 +175,7 @@ struct abi_def {
    abi_extensions_type                                        abi_extensions{};
    might_not_exist<std::vector<variant_def>>                  variants{};
    might_not_exist<std::vector<action_result_def>>            action_results{};
-   might_not_exist<std::map<eosio::name, kv_table_entry_def>> kv_tables{};
+   might_not_exist<std::map<sysio::name, kv_table_entry_def>> kv_tables{};
 };
 
 EOSIO_REFLECT(abi_def, version, types, structs, actions, tables, ricardian_clauses, error_messages, abi_extensions,
@@ -252,11 +252,11 @@ struct abi_type {
 };
 
 struct abi {
-   std::map<eosio::name, std::string> action_types;
-   std::map<eosio::name, std::string> table_types;
-   std::map<eosio::name, std::string> kv_tables;
+   std::map<sysio::name, std::string> action_types;
+   std::map<sysio::name, std::string> table_types;
+   std::map<sysio::name, std::string> kv_tables;
    std::map<std::string, abi_type>    abi_types;
-   std::map<eosio::name, std::string> action_result_types;
+   std::map<sysio::name, std::string> action_result_types;
    const abi_type*                    get_type(const std::string& name);
 
    // Adds a type to the abi.  Has no effect if the type is already present.
@@ -361,7 +361,7 @@ abi_type* add_type(abi& a, might_not_exist<T>*) {
 
 template <typename T>
 abi_type* abi::add_type() {
-   using eosio::add_type;
+   using sysio::add_type;
    return add_type(*this, (T*)nullptr);
 }
 
@@ -390,4 +390,4 @@ void to_json(const abi_def& def, S& stream) {
    to_json_write_helper(def.kv_tables.value, "kv_tables", true, stream);
    stream.write('}');
 }
-} // namespace eosio
+} // namespace sysio

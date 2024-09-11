@@ -1,21 +1,21 @@
 #pragma once
 
-#ifdef __eosio_cdt__
+#ifdef __sysio_cdt__
 
-namespace eosio {
+namespace sysio {
 
 using float32  = float;
 using float64  = double;
 using float128 = long double;
 
-} // namespace eosio
+} // namespace sysio
 
 #else
 
-#   include <eosio/fixed_bytes.hpp>
+#   include <sysio/fixed_bytes.hpp>
 #   include <limits>
 
-namespace eosio {
+namespace sysio {
 
 using float32  = float;
 using float64  = double;
@@ -30,6 +30,6 @@ static_assert(sizeof(float64) == 8 && std::numeric_limits<float64>::is_iec559 &&
 
 EOSIO_REFLECT(float128, value);
 
-} // namespace eosio
+} // namespace sysio
 
 #endif

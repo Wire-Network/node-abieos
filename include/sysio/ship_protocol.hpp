@@ -11,23 +11,23 @@
 #include "varint.hpp"
 
 // todo: move
-namespace eosio {
+namespace sysio {
 template <typename S>
 void to_json(const input_stream& data, S& stream) {
    return to_json_hex(data.pos, data.end - data.pos, stream);
 }
 
 constexpr const char* get_type_name(const input_stream*) { return "bytes"; }
-} // namespace eosio
+} // namespace sysio
 
-namespace eosio { namespace ship_protocol {
+namespace sysio { namespace ship_protocol {
 
    typedef __uint128_t uint128_t;
 
-#ifdef __eosio_cdt__
+#ifdef __sysio_cdt__
 #   pragma clang diagnostic push
 #   pragma clang diagnostic ignored "-Winvalid-noreturn"
-   [[noreturn]] inline void report_error(const std::string& s) { eosio::check(false, s); }
+   [[noreturn]] inline void report_error(const std::string& s) { sysio::check(false, s); }
 #   pragma clang diagnostic pop
 #else
    [[noreturn]] inline void report_error(const std::string& s) { throw std::runtime_error(s); }
@@ -35,7 +35,7 @@ namespace eosio { namespace ship_protocol {
 
    struct extension {
       uint16_t            type = {};
-      eosio::input_stream data = {};
+      sysio::input_stream data = {};
    };
 
    EOSIO_REFLECT(extension, type, data)
@@ -48,7 +48,7 @@ namespace eosio { namespace ship_protocol {
       expired   = 4, // transaction expired and storage space refunded to user
    };
 
-   // todo: switch to eosio::result. switch to new serializer string support.
+   // todo: switch to sysio::result. switch to new serializer string support.
    inline std::string to_string(transaction_status status) {
       switch (status) {
          case transaction_status::executed: return "executed";
@@ -60,7 +60,7 @@ namespace eosio { namespace ship_protocol {
       report_error("unknown status: " + std::to_string((uint8_t)status));
    }
 
-   // todo: switch to eosio::result. switch to new serializer string support.
+   // todo: switch to sysio::result. switch to new serializer string support.
    inline transaction_status get_transaction_status(const std::string& s) {
       if (s == "executed")
          return transaction_status::executed;
@@ -81,7 +81,7 @@ namespace eosio { namespace ship_protocol {
 
    struct block_position {
       uint32_t           block_num = {};
-      eosio::checksum256 block_id  = {};
+      sysio::checksum256 block_id  = {};
    };
 
    EOSIO_REFLECT(block_position, block_num, block_id)
@@ -93,7 +93,7 @@ namespace eosio { namespace ship_protocol {
       uint32_t           trace_end_block         = {};
       uint32_t           chain_state_begin_block = {};
       uint32_t           chain_state_end_block   = {};
-      eosio::checksum256 chain_id                = {}; // todo: switch to binary extension
+      sysio::checksum256 chain_id                = {}; // todo: switch to binary extension
    };
 
    EOSIO_REFLECT(get_status_result_v0, head, last_irreversible, trace_begin_block, trace_end_block,
@@ -140,16 +140,16 @@ namespace eosio { namespace ship_protocol {
    EOSIO_REFLECT(get_blocks_result_base, head, last_irreversible, this_block, prev_block)
 
    struct get_blocks_result_v0 : get_blocks_result_base {
-      std::optional<eosio::input_stream> block  = {};
-      std::optional<eosio::input_stream> traces = {};
-      std::optional<eosio::input_stream> deltas = {};
+      std::optional<sysio::input_stream> block  = {};
+      std::optional<sysio::input_stream> traces = {};
+      std::optional<sysio::input_stream> deltas = {};
    };
 
    EOSIO_REFLECT(get_blocks_result_v0, base get_blocks_result_base, block, traces, deltas)
 
    struct row_v0 {
       bool                present = {};     // false (not present), true (present, old / new)
-      eosio::input_stream data    = {};
+      sysio::input_stream data    = {};
    };
 
    EOSIO_REFLECT(row_v0, present, data)
@@ -163,7 +163,7 @@ namespace eosio { namespace ship_protocol {
 
    struct row_v1 {
       uint8_t             present = {};     // 0 (not present), 1 (present, old), 2 (present, new)
-      eosio::input_stream data    = {};
+      sysio::input_stream data    = {};
    };
 
    EOSIO_REFLECT(row_v1, present, data)
@@ -178,23 +178,23 @@ namespace eosio { namespace ship_protocol {
    using table_delta = std::variant<table_delta_v0, table_delta_v1>;
 
    struct permission_level {
-      eosio::name actor      = {};
-      eosio::name permission = {};
+      sysio::name actor      = {};
+      sysio::name permission = {};
    };
 
    EOSIO_REFLECT(permission_level, actor, permission)
 
    struct action {
-      eosio::name                   account       = {};
-      eosio::name                   name          = {};
+      sysio::name                   account       = {};
+      sysio::name                   name          = {};
       std::vector<permission_level> authorization = {};
-      eosio::input_stream           data          = {};
+      sysio::input_stream           data          = {};
    };
 
    EOSIO_REFLECT(action, account, name, authorization, data)
 
    struct account_auth_sequence {
-      eosio::name account  = {};
+      sysio::name account  = {};
       uint64_t    sequence = {};
    };
 
@@ -202,13 +202,13 @@ namespace eosio { namespace ship_protocol {
    EOSIO_COMPARE(account_auth_sequence);
 
    struct action_receipt_v0 {
-      eosio::name                        receiver        = {};
-      eosio::checksum256                 act_digest      = {};
+      sysio::name                        receiver        = {};
+      sysio::checksum256                 act_digest      = {};
       uint64_t                           global_sequence = {};
       uint64_t                           recv_sequence   = {};
       std::vector<account_auth_sequence> auth_sequence   = {};
-      eosio::varuint32                   code_sequence   = {};
-      eosio::varuint32                   abi_sequence    = {};
+      sysio::varuint32                   code_sequence   = {};
+      sysio::varuint32                   abi_sequence    = {};
    };
 
    EOSIO_REFLECT(action_receipt_v0, receiver, act_digest, global_sequence, recv_sequence, auth_sequence, code_sequence,
@@ -217,7 +217,7 @@ namespace eosio { namespace ship_protocol {
    using action_receipt = std::variant<action_receipt_v0>;
 
    struct account_delta {
-      eosio::name account = {};
+      sysio::name account = {};
       int64_t     delta   = {};
    };
 
@@ -225,10 +225,10 @@ namespace eosio { namespace ship_protocol {
    EOSIO_COMPARE(account_delta);
 
    struct action_trace_v0 {
-      eosio::varuint32              action_ordinal         = {};
-      eosio::varuint32              creator_action_ordinal = {};
+      sysio::varuint32              action_ordinal         = {};
+      sysio::varuint32              creator_action_ordinal = {};
       std::optional<action_receipt> receipt                = {};
-      eosio::name                   receiver               = {};
+      sysio::name                   receiver               = {};
       action                        act                    = {};
       bool                          context_free           = {};
       int64_t                       elapsed                = {};
@@ -242,10 +242,10 @@ namespace eosio { namespace ship_protocol {
                  console, account_ram_deltas, except, error_code)
 
    struct action_trace_v1 {
-      eosio::varuint32              action_ordinal         = {};
-      eosio::varuint32              creator_action_ordinal = {};
+      sysio::varuint32              action_ordinal         = {};
+      sysio::varuint32              creator_action_ordinal = {};
       std::optional<action_receipt> receipt                = {};
-      eosio::name                   receiver               = {};
+      sysio::name                   receiver               = {};
       action                        act                    = {};
       bool                          context_free           = {};
       int64_t                       elapsed                = {};
@@ -254,7 +254,7 @@ namespace eosio { namespace ship_protocol {
       std::vector<account_delta>    account_disk_deltas    = {};
       std::optional<std::string>    except                 = {};
       std::optional<uint64_t>       error_code             = {};
-      eosio::input_stream           return_value           = {};
+      sysio::input_stream           return_value           = {};
    };
 
    EOSIO_REFLECT(action_trace_v1, action_ordinal, creator_action_ordinal, receipt, receiver, act, context_free, elapsed,
@@ -264,24 +264,24 @@ namespace eosio { namespace ship_protocol {
 
    struct prunable_data_type {
       struct none {
-         eosio::checksum256 prunable_digest;
+         sysio::checksum256 prunable_digest;
       };
 
-      using segment_type = std::variant<eosio::checksum256, eosio::input_stream>;
+      using segment_type = std::variant<sysio::checksum256, sysio::input_stream>;
 
       struct partial {
-         std::vector<eosio::signature> signatures;
+         std::vector<sysio::signature> signatures;
          std::vector<segment_type>     context_free_segments;
       };
 
       struct full {
-         std::vector<eosio::signature>    signatures;
-         std::vector<eosio::input_stream> context_free_segments;
+         std::vector<sysio::signature>    signatures;
+         std::vector<sysio::input_stream> context_free_segments;
       };
 
       struct full_legacy {
-         std::vector<eosio::signature> signatures;
-         eosio::input_stream           packed_context_free_data;
+         std::vector<sysio::signature> signatures;
+         sysio::input_stream           packed_context_free_data;
       };
 
       using prunable_data_t = std::variant<full_legacy, none, partial, full>;
@@ -296,27 +296,27 @@ namespace eosio { namespace ship_protocol {
    EOSIO_REFLECT(prunable_data_type::full_legacy, signatures, packed_context_free_data)
 
    struct partial_transaction_v0 {
-      eosio::time_point_sec            expiration             = {};
+      sysio::time_point_sec            expiration             = {};
       uint16_t                         ref_block_num          = {};
       uint32_t                         ref_block_prefix       = {};
-      eosio::varuint32                 max_net_usage_words    = {};
+      sysio::varuint32                 max_net_usage_words    = {};
       uint8_t                          max_cpu_usage_ms       = {};
-      eosio::varuint32                 delay_sec              = {};
+      sysio::varuint32                 delay_sec              = {};
       std::vector<extension>           transaction_extensions = {};
-      std::vector<eosio::signature>    signatures             = {};
-      std::vector<eosio::input_stream> context_free_data      = {};
+      std::vector<sysio::signature>    signatures             = {};
+      std::vector<sysio::input_stream> context_free_data      = {};
    };
 
    EOSIO_REFLECT(partial_transaction_v0, expiration, ref_block_num, ref_block_prefix, max_net_usage_words,
                  max_cpu_usage_ms, delay_sec, transaction_extensions, signatures, context_free_data)
 
    struct partial_transaction_v1 {
-      eosio::time_point_sec             expiration             = {};
+      sysio::time_point_sec             expiration             = {};
       uint16_t                          ref_block_num          = {};
       uint32_t                          ref_block_prefix       = {};
-      eosio::varuint32                  max_net_usage_words    = {};
+      sysio::varuint32                  max_net_usage_words    = {};
       uint8_t                           max_cpu_usage_ms       = {};
-      eosio::varuint32                  delay_sec              = {};
+      sysio::varuint32                  delay_sec              = {};
       std::vector<extension>            transaction_extensions = {};
       std::optional<prunable_data_type> prunable_data          = {};
    };
@@ -329,10 +329,10 @@ namespace eosio { namespace ship_protocol {
    struct recurse_transaction_trace;
 
    struct transaction_trace_v0 {
-      eosio::checksum256                     id                = {};
+      sysio::checksum256                     id                = {};
       transaction_status                     status            = {};
       uint32_t                               cpu_usage_us      = {};
-      eosio::varuint32                       net_usage_words   = {};
+      sysio::varuint32                       net_usage_words   = {};
       int64_t                                elapsed           = {};
       uint64_t                               net_usage         = {};
       bool                                   scheduled         = {};
@@ -358,8 +358,8 @@ namespace eosio { namespace ship_protocol {
    };
 
    struct producer_key {
-      eosio::name       producer_name     = {};
-      eosio::public_key block_signing_key = {};
+      sysio::name       producer_name     = {};
+      sysio::public_key block_signing_key = {};
    };
 
    EOSIO_REFLECT(producer_key, producer_name, block_signing_key)
@@ -374,16 +374,16 @@ namespace eosio { namespace ship_protocol {
    struct transaction_receipt_header {
       transaction_status status          = {};
       uint32_t           cpu_usage_us    = {};
-      eosio::varuint32   net_usage_words = {};
+      sysio::varuint32   net_usage_words = {};
    };
 
    EOSIO_REFLECT(transaction_receipt_header, status, cpu_usage_us, net_usage_words)
 
    struct packed_transaction_v0 {
-      std::vector<eosio::signature> signatures               = {};
+      std::vector<sysio::signature> signatures               = {};
       uint8_t                       compression              = {};
-      eosio::input_stream           packed_context_free_data = {};
-      eosio::input_stream           packed_trx               = {};
+      sysio::input_stream           packed_context_free_data = {};
+      sysio::input_stream           packed_trx               = {};
    };
 
    EOSIO_REFLECT(packed_transaction_v0, signatures, compression, packed_context_free_data, packed_trx)
@@ -391,12 +391,12 @@ namespace eosio { namespace ship_protocol {
    struct packed_transaction {
       uint8_t             compression   = {};
       prunable_data_type  prunable_data = {};
-      eosio::input_stream packed_trx    = {};
+      sysio::input_stream packed_trx    = {};
    };
 
    EOSIO_REFLECT(packed_transaction, compression, prunable_data, packed_trx)
 
-   using transaction_variant_v0 = std::variant<eosio::checksum256, packed_transaction_v0>;
+   using transaction_variant_v0 = std::variant<sysio::checksum256, packed_transaction_v0>;
 
    struct transaction_receipt_v0 : transaction_receipt_header {
       transaction_variant_v0 trx = {};
@@ -404,7 +404,7 @@ namespace eosio { namespace ship_protocol {
 
    EOSIO_REFLECT(transaction_receipt_v0, base transaction_receipt_header, trx)
 
-   using transaction_variant = std::variant<eosio::checksum256, packed_transaction>;
+   using transaction_variant = std::variant<sysio::checksum256, packed_transaction>;
 
    struct transaction_receipt : transaction_receipt_header {
       transaction_variant trx = {};
@@ -413,12 +413,12 @@ namespace eosio { namespace ship_protocol {
    EOSIO_REFLECT(transaction_receipt, base transaction_receipt_header, trx)
 
    struct block_header {
-      eosio::block_timestamp           timestamp{};
-      eosio::name                      producer          = {};
+      sysio::block_timestamp           timestamp{};
+      sysio::name                      producer          = {};
       uint16_t                         confirmed         = {};
-      eosio::checksum256               previous          = {};
-      eosio::checksum256               transaction_mroot = {};
-      eosio::checksum256               action_mroot      = {};
+      sysio::checksum256               previous          = {};
+      sysio::checksum256               transaction_mroot = {};
+      sysio::checksum256               action_mroot      = {};
       uint32_t                         schedule_version  = {};
       std::optional<producer_schedule> new_producers     = {};
       std::vector<extension>           header_extensions = {};
@@ -428,7 +428,7 @@ namespace eosio { namespace ship_protocol {
                  schedule_version, new_producers, header_extensions)
 
    struct signed_block_header : block_header {
-      eosio::signature producer_signature = {};
+      sysio::signature producer_signature = {};
    };
 
    EOSIO_REFLECT(signed_block_header, base block_header, producer_signature)
@@ -452,17 +452,17 @@ namespace eosio { namespace ship_protocol {
 
    struct get_blocks_result_v1 : get_blocks_result_base {
       std::optional<signed_block_variant>           block  = {};
-      eosio::opaque<std::vector<transaction_trace>> traces = {};
-      eosio::opaque<std::vector<table_delta>>       deltas = {};
+      sysio::opaque<std::vector<transaction_trace>> traces = {};
+      sysio::opaque<std::vector<table_delta>>       deltas = {};
    };
 
    EOSIO_REFLECT(get_blocks_result_v1, base get_blocks_result_base, block, traces, deltas)
 
    struct get_blocks_result_v2 : get_blocks_result_base { 
-      eosio::opaque<signed_block_variant>           block = {};
-      eosio::opaque<signed_block_header>            block_header = {};
-      eosio::opaque<std::vector<transaction_trace>> traces = {};
-      eosio::opaque<std::vector<table_delta>>       deltas = {};
+      sysio::opaque<signed_block_variant>           block = {};
+      sysio::opaque<signed_block_header>            block_header = {};
+      sysio::opaque<std::vector<transaction_trace>> traces = {};
+      sysio::opaque<std::vector<table_delta>>       deltas = {};
    };
 
    EOSIO_REFLECT(get_blocks_result_v2, base get_blocks_result_base, block, block_header, traces, deltas)
@@ -470,12 +470,12 @@ namespace eosio { namespace ship_protocol {
    using result = std::variant<get_status_result_v0, get_blocks_result_v0, get_blocks_result_v1, get_blocks_result_v2>;
 
    struct transaction_header {
-      eosio::time_point_sec expiration          = {};
+      sysio::time_point_sec expiration          = {};
       uint16_t              ref_block_num       = {};
       uint32_t              ref_block_prefix    = {};
-      eosio::varuint32      max_net_usage_words = {};
+      sysio::varuint32      max_net_usage_words = {};
       uint8_t               max_cpu_usage_ms    = {};
-      eosio::varuint32      delay_sec           = {};
+      sysio::varuint32      delay_sec           = {};
    };
 
    EOSIO_REFLECT(transaction_header, expiration, ref_block_num, ref_block_prefix, max_net_usage_words, max_cpu_usage_ms,
@@ -492,15 +492,15 @@ namespace eosio { namespace ship_protocol {
    struct code_id {
       uint8_t            vm_type    = {};
       uint8_t            vm_version = {};
-      eosio::checksum256 code_hash  = {};
+      sysio::checksum256 code_hash  = {};
    };
 
    EOSIO_REFLECT(code_id, vm_type, vm_version, code_hash)
 
    struct account_v0 {
-      eosio::name            name          = {};
-      eosio::block_timestamp creation_date = {};
-      eosio::input_stream    abi           = {};
+      sysio::name            name          = {};
+      sysio::block_timestamp creation_date = {};
+      sysio::input_stream    abi           = {};
    };
 
    EOSIO_REFLECT(account_v0, name, creation_date, abi)
@@ -508,9 +508,9 @@ namespace eosio { namespace ship_protocol {
    using account = std::variant<account_v0>;
 
    struct account_metadata_v0 {
-      eosio::name            name             = {};
+      sysio::name            name             = {};
       bool                   privileged       = {};
-      eosio::time_point      last_code_update = {};
+      sysio::time_point      last_code_update = {};
       std::optional<code_id> code             = {};
    };
 
@@ -521,8 +521,8 @@ namespace eosio { namespace ship_protocol {
    struct code_v0 {
       uint8_t             vm_type    = {};
       uint8_t             vm_version = {};
-      eosio::checksum256  code_hash  = {};
-      eosio::input_stream code       = {};
+      sysio::checksum256  code_hash  = {};
+      sysio::input_stream code       = {};
    };
 
    EOSIO_REFLECT(code_v0, vm_type, vm_version, code_hash, code)
@@ -530,10 +530,10 @@ namespace eosio { namespace ship_protocol {
    using code = std::variant<code_v0>;
 
    struct contract_table_v0 {
-      eosio::name code  = {};
-      eosio::name scope = {};
-      eosio::name table = {};
-      eosio::name payer = {};
+      sysio::name code  = {};
+      sysio::name scope = {};
+      sysio::name table = {};
+      sysio::name payer = {};
    };
 
    EOSIO_REFLECT(contract_table_v0, code, scope, table, payer)
@@ -541,12 +541,12 @@ namespace eosio { namespace ship_protocol {
    using contract_table = std::variant<contract_table_v0>;
 
    struct contract_row_v0 {
-      eosio::name         code        = {};
-      eosio::name         scope       = {};
-      eosio::name         table       = {};
+      sysio::name         code        = {};
+      sysio::name         scope       = {};
+      sysio::name         table       = {};
       uint64_t            primary_key = {};
-      eosio::name         payer       = {};
-      eosio::input_stream value       = {};
+      sysio::name         payer       = {};
+      sysio::input_stream value       = {};
    };
 
    EOSIO_REFLECT(contract_row_v0, code, scope, table, primary_key, payer, value)
@@ -554,11 +554,11 @@ namespace eosio { namespace ship_protocol {
    using contract_row = std::variant<contract_row_v0>;
 
    struct contract_index64_v0 {
-      eosio::name code          = {};
-      eosio::name scope         = {};
-      eosio::name table         = {};
+      sysio::name code          = {};
+      sysio::name scope         = {};
+      sysio::name table         = {};
       uint64_t    primary_key   = {};
-      eosio::name payer         = {};
+      sysio::name payer         = {};
       uint64_t    secondary_key = {};
    };
 
@@ -567,11 +567,11 @@ namespace eosio { namespace ship_protocol {
    using contract_index64 = std::variant<contract_index64_v0>;
 
    struct contract_index128_v0 {
-      eosio::name code          = {};
-      eosio::name scope         = {};
-      eosio::name table         = {};
+      sysio::name code          = {};
+      sysio::name scope         = {};
+      sysio::name table         = {};
       uint64_t    primary_key   = {};
-      eosio::name payer         = {};
+      sysio::name payer         = {};
       uint128_t   secondary_key = {};
    };
 
@@ -580,12 +580,12 @@ namespace eosio { namespace ship_protocol {
    using contract_index128 = std::variant<contract_index128_v0>;
 
    struct contract_index256_v0 {
-      eosio::name        code          = {};
-      eosio::name        scope         = {};
-      eosio::name        table         = {};
+      sysio::name        code          = {};
+      sysio::name        scope         = {};
+      sysio::name        table         = {};
       uint64_t           primary_key   = {};
-      eosio::name        payer         = {};
-      eosio::checksum256 secondary_key = {};
+      sysio::name        payer         = {};
+      sysio::checksum256 secondary_key = {};
    };
 
    EOSIO_REFLECT(contract_index256_v0, code, scope, table, primary_key, payer, secondary_key)
@@ -593,11 +593,11 @@ namespace eosio { namespace ship_protocol {
    using contract_index256 = std::variant<contract_index256_v0>;
 
    struct contract_index_double_v0 {
-      eosio::name code          = {};
-      eosio::name scope         = {};
-      eosio::name table         = {};
+      sysio::name code          = {};
+      sysio::name scope         = {};
+      sysio::name table         = {};
       uint64_t    primary_key   = {};
-      eosio::name payer         = {};
+      sysio::name payer         = {};
       double      secondary_key = {};
    };
 
@@ -606,12 +606,12 @@ namespace eosio { namespace ship_protocol {
    using contract_index_double = std::variant<contract_index_double_v0>;
 
    struct contract_index_long_double_v0 {
-      eosio::name     code          = {};
-      eosio::name     scope         = {};
-      eosio::name     table         = {};
+      sysio::name     code          = {};
+      sysio::name     scope         = {};
+      sysio::name     table         = {};
       uint64_t        primary_key   = {};
-      eosio::name     payer         = {};
-      eosio::float128 secondary_key = {};
+      sysio::name     payer         = {};
+      sysio::float128 secondary_key = {};
    };
 
    EOSIO_REFLECT(contract_index_long_double_v0, code, scope, table, primary_key, payer, secondary_key)
@@ -619,10 +619,10 @@ namespace eosio { namespace ship_protocol {
    using contract_index_long_double = std::variant<contract_index_long_double_v0>;
 
    struct key_value_v0 {
-      eosio::name         contract = {};
-      eosio::input_stream key      = {};
-      eosio::input_stream value    = {};
-      eosio::name         payer    = {};
+      sysio::name         contract = {};
+      sysio::input_stream key      = {};
+      sysio::input_stream value    = {};
+      sysio::name         payer    = {};
    };
 
    EOSIO_REFLECT(key_value_v0, contract, key, value, payer)
@@ -630,7 +630,7 @@ namespace eosio { namespace ship_protocol {
    using key_value = std::variant<key_value_v0>;
 
    struct key_weight {
-      eosio::public_key key    = {};
+      sysio::public_key key    = {};
       uint16_t          weight = {};
    };
 
@@ -646,7 +646,7 @@ namespace eosio { namespace ship_protocol {
    using block_signing_authority = std::variant<block_signing_authority_v0>;
 
    struct producer_authority {
-      eosio::name             producer_name = {};
+      sysio::name             producer_name = {};
       block_signing_authority authority     = {};
    };
 
@@ -728,7 +728,7 @@ namespace eosio { namespace ship_protocol {
       std::optional<uint32_t>     proposed_schedule_block_num = {};
       producer_authority_schedule proposed_schedule           = {};
       chain_config                configuration               = {};
-      eosio::checksum256          chain_id                    = {};
+      sysio::checksum256          chain_id                    = {};
    };
 
    EOSIO_REFLECT(global_property_v1, proposed_schedule_block_num, proposed_schedule, configuration, chain_id)
@@ -762,11 +762,11 @@ namespace eosio { namespace ship_protocol {
    using global_property = std::variant<global_property_v0, global_property_v1>;
 
    struct generated_transaction_v0 {
-      eosio::name         sender     = {};
+      sysio::name         sender     = {};
       uint128_t           sender_id  = {};
-      eosio::name         payer      = {};
-      eosio::checksum256  trx_id     = {};
-      eosio::input_stream packed_trx = {};
+      sysio::name         payer      = {};
+      sysio::checksum256  trx_id     = {};
+      sysio::input_stream packed_trx = {};
    };
 
    EOSIO_REFLECT(generated_transaction_v0, sender, sender_id, payer, trx_id, packed_trx)
@@ -774,7 +774,7 @@ namespace eosio { namespace ship_protocol {
    using generated_transaction = std::variant<generated_transaction_v0>;
 
    struct activated_protocol_feature_v0 {
-      eosio::checksum256 feature_digest       = {};
+      sysio::checksum256 feature_digest       = {};
       uint32_t           activation_block_num = {};
    };
 
@@ -814,10 +814,10 @@ namespace eosio { namespace ship_protocol {
    EOSIO_REFLECT(authority, threshold, keys, accounts, waits)
 
    struct permission_v0 {
-      eosio::name       owner        = {};
-      eosio::name       name         = {};
-      eosio::name       parent       = {};
-      eosio::time_point last_updated = {};
+      sysio::name       owner        = {};
+      sysio::name       name         = {};
+      sysio::name       parent       = {};
+      sysio::time_point last_updated = {};
       authority         auth         = {};
    };
 
@@ -826,10 +826,10 @@ namespace eosio { namespace ship_protocol {
    using permission = std::variant<permission_v0>;
 
    struct permission_link_v0 {
-      eosio::name account             = {};
-      eosio::name code                = {};
-      eosio::name message_type        = {};
-      eosio::name required_permission = {};
+      sysio::name account             = {};
+      sysio::name code                = {};
+      sysio::name message_type        = {};
+      sysio::name required_permission = {};
    };
 
    EOSIO_REFLECT(permission_link_v0, account, code, message_type, required_permission)
@@ -837,7 +837,7 @@ namespace eosio { namespace ship_protocol {
    using permission_link = std::variant<permission_link_v0>;
 
    struct resource_limits_v0 {
-      eosio::name owner      = {};
+      sysio::name owner      = {};
       int64_t     net_weight = {};
       int64_t     cpu_weight = {};
       int64_t     ram_bytes  = {};
@@ -858,7 +858,7 @@ namespace eosio { namespace ship_protocol {
    using usage_accumulator = std::variant<usage_accumulator_v0>;
 
    struct resource_usage_v0 {
-      eosio::name       owner     = {};
+      sysio::name       owner     = {};
       usage_accumulator net_usage = {};
       usage_accumulator cpu_usage = {};
       uint64_t          ram_usage = {};
@@ -917,20 +917,20 @@ namespace eosio { namespace ship_protocol {
 
    using resource_limits_config = std::variant<resource_limits_config_v0>;
 
-}} // namespace eosio::ship_protocol
+}} // namespace sysio::ship_protocol
 
-namespace eosio {
+namespace sysio {
 
    template <typename S>
    void to_json(const ship_protocol::transaction_status& status, S& stream) {
       // todo: switch to new serializer string support.
-      return eosio::to_json((uint8_t)status, stream);
+      return sysio::to_json((uint8_t)status, stream);
    }
 
    template <typename S>
    void from_json(ship_protocol::transaction_status& status, S& stream) {
       uint8_t v;
-      eosio::from_json(v, stream);
+      sysio::from_json(v, stream);
       status = (ship_protocol::transaction_status)v;
    }
 
