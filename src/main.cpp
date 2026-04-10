@@ -183,8 +183,13 @@ string get_type_for_table(const char *contract_name, const char *table_name)
 {
     if(global_context != nullptr) {
         uint64_t contract = abieos_string_to_name(global_context, contract_name);
-        uint64_t table = abieos_string_to_name(global_context, table_name);
-        auto result = abieos_get_type_for_table(global_context,contract, table);
+        // abieos PR #12 widened table_def.name to a free-form string and
+        // changed abieos_get_type_for_table() to take const char* instead of
+        // a uint64-encoded sysio::name. Pass the table name straight through
+        // — the prior abieos_string_to_name(table_name) round trip silently
+        // truncated any name longer than 12 chars or containing characters
+        // outside the sysio name alphabet.
+        auto result = abieos_get_type_for_table(global_context, contract, table_name);
         if(result == nullptr) {
             return "NOT_FOUND";
         } else {
