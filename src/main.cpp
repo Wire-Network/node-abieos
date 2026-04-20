@@ -166,6 +166,9 @@ Napi::Boolean LoadAbiHexWrapped(const Napi::CallbackInfo &info)
 string get_type_for_action(const char *contract_name, const char *action_name)
 {
     if(global_context != nullptr) {
+        // Contract + action are both sysio::name (uint64) on-chain, so both
+        // go through abieos_string_to_name. Contrast with get_type_for_table
+        // below, where only the contract is sysio::name-encoded.
         uint64_t contract = abieos_string_to_name(global_context, contract_name);
         uint64_t action = abieos_string_to_name(global_context, action_name);
         auto result = abieos_get_type_for_action(global_context, contract, action);
@@ -182,13 +185,8 @@ string get_type_for_action(const char *contract_name, const char *action_name)
 string get_type_for_table(const char *contract_name, const char *table_name)
 {
     if(global_context != nullptr) {
+        // Contract remains sysio::name-encoded; table_name is a free-form string (abieos#12).
         uint64_t contract = abieos_string_to_name(global_context, contract_name);
-        // abieos PR #12 widened table_def.name to a free-form string and
-        // changed abieos_get_type_for_table() to take const char* instead of
-        // a uint64-encoded sysio::name. Pass the table name straight through
-        // — the prior abieos_string_to_name(table_name) round trip silently
-        // truncated any name longer than 12 chars or containing characters
-        // outside the sysio name alphabet.
         auto result = abieos_get_type_for_table(global_context, contract, table_name);
         if(result == nullptr) {
             return "NOT_FOUND";
