@@ -1,6 +1,6 @@
 import {Abieos} from "../lib/abieos.js";
 import {readFileSync} from "node:fs";
-import {typeTests} from "./tests.mjs";
+import {typeTests, longNameRegressionTest} from "./tests.mjs";
 
 const ABIs = [
     {code: 'eosio', path: './ABIs/eosio.json'},
@@ -24,6 +24,8 @@ ABIs.forEach(value => {
 });
 
 typeTests();
+
+longNameRegressionTest();
 
 // stringToName
 console.log('stringToName: eosio -->', abieos.stringToName('eosio'));
