@@ -1,5 +1,12 @@
 import {Abieos} from "../lib/abieos.js";
 
+/**
+ * Positive-path type lookups plus one deliberate negative test.
+ *
+ * `expects === ''` marks a negative test: the underlying getTypeFor*() call
+ * is expected to throw (e.g. contract/table unknown). Throws an AggregateError
+ * at the end if any case failed so the process exits non-zero under `npm test`.
+ */
 export function typeTests() {
 
     const abieos = Abieos.getInstance();
@@ -14,21 +21,35 @@ export function typeTests() {
         {type: 'table', code: '2', name: 'null', expects: ''},
     ];
 
+    let failures = 0;
     typeTests.forEach((value, index) => {
         console.log(`[${index + 1}/${typeTests.length}] Testing ${value.type} type for ${value.code}::${value.name}`);
         try {
             const type = value.type === 'action' ?
                 abieos.getTypeForAction(value.code, value.name) :
                 abieos.getTypeForTable(value.code, value.name);
-            if (type === value.expects) {
+            if (value.expects === '') {
+                failures++;
+                console.log(`ERROR - expected throw, got: ${type}`);
+            } else if (type === value.expects) {
                 console.log(`OK - ${type} === ${value.expects}`);
             } else {
+                failures++;
                 console.log(`ERROR - Got: ${type}, Expected: ${value.expects}`);
             }
         } catch (e) {
-            console.log(`ERROR - ${e.message}`);
+            if (value.expects === '') {
+                console.log(`OK - throws as expected: ${e.message}`);
+            } else {
+                failures++;
+                console.log(`ERROR - ${e.message}`);
+            }
         }
     });
+
+    if (failures > 0) {
+        throw new Error(`typeTests: ${failures}/${typeTests.length} failed`);
+    }
 }
 
 /**
@@ -81,19 +102,15 @@ export function longNameRegressionTest() {
 
     const loaded = abieos.loadAbi('longnamecontract', JSON.stringify(longNameAbi));
     if (!loaded) {
-        console.log('ERROR - longNameRegressionTest: failed to load test ABI');
-        return;
+        throw new Error('longNameRegressionTest: failed to load test ABI');
     }
 
     try {
         const type = abieos.getTypeForTable('longnamecontract', 'verylongtablename123');
-        if (type === 'long_row') {
-            console.log('OK - long table name (20 chars) resolved to long_row');
-        } else {
-            console.log(`ERROR - long table name lookup: got "${type}", expected "long_row"`);
+        if (type !== 'long_row') {
+            throw new Error(`longNameRegressionTest: got "${type}", expected "long_row"`);
         }
-    } catch (e) {
-        console.log(`ERROR - longNameRegressionTest exception: ${e.message}`);
+        console.log('OK - long table name (20 chars) resolved to long_row');
     } finally {
         abieos.deleteContract('longnamecontract');
     }
